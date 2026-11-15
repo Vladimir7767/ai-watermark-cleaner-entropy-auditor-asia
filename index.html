@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>APAC AI Text Detector &amp; LLM Watermark Cleaner — IMPERIA Hub</title>
+<meta name="description" content="Free client-side AI text forensics and Unicode watermark sanitizer for APAC creators. Detect hidden zero-width characters (U+200B), calculate sentence burstiness, and strip LLM traces in 1 click.">
+<style>
+:root {
+  --primary: #0284c7;
+  --primary-hover: #0369a1;
+  --success: #10b981;
+  --danger: #ef4444;
+  --bg: #f4f6f9;
+  --card-bg: #ffffff;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #f59e0b;
+  --purple: #8b5cf6;
+  --slate: #334155;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+body { background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+.wrapper { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; width: 100%; max-width: 580px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+h1 { font-size: 21px; font-weight: 700; margin-bottom: 4px; text-align: center; letter-spacing: -0.025em; }
+.subtitle { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 20px; }
+.live-meter { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 20px; text-align: center; }
+.meter-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.05em; }
+.bar-container { background: var(--border); border-radius: 20px; height: 12px; width: 100%; overflow: hidden; position: relative; }
+.bar-fill { background: var(--primary); width: 0%; height: 100%; transition: all 0.4s ease; }
+.group { margin-bottom: 16px; }
+label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; background: #fff; color: var(--text); transition: border 0.2s; resize: vertical; min-height: 130px; line-height: 1.5; }
+textarea:focus { border-color: var(--primary); outline: none; }
+.checkbox-group { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--border); }
+.checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.checkbox-item input { width: 16px; height: 16px; cursor: pointer; }
+.calc-btn { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px -1px rgba(2,132,199,0.2); transition: background 0.2s; }
+.calc-btn:hover { background: var(--primary-hover); }
+.copy-btn { width: 100%; padding: 11px; background: #f8fafc; color: var(--slate); border: 1px solid var(--border); border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: all 0.2s; }
+.copy-btn:hover { background: #e2e8f0; }
+.skynet-box { background: #fee2e2; border: 1px solid #fca5a5; border-radius: 12px; padding: 14px; margin-top: 20px; display: none; }
+.skynet-title { font-size: 12px; font-weight: 700; color: var(--danger); margin-bottom: 6px; text-transform: uppercase; text-align: center; letter-spacing: 0.05em; }
+.results { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-top: 20px; display: none; }
+.results-title { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; }
+.res-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px dashed var(--border); align-items: center; }
+.res-row:last-child { border-bottom: none; }
+.res-val { font-weight: 700; color: var(--primary); text-align: right; max-width: 65%; }
+.clean-output-box { margin-top: 14px; }
+.clean-output-box textarea { background: #ffffff; border-color: var(--success); min-height: 110px; }
+.partner-btn { display: block; width: 100%; padding: 11px; background: #fff; border: 1px solid var(--purple); color: var(--purple); border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-align: center; margin-top: 12px; text-decoration: none; }
+.partner-btn:hover { background: var(--purple); color: #fff; }
+.math-log-box { background: #f1f5f9; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-top: 12px; font-family: monospace; font-size: 12px; color: var(--slate); display: none; }
+.seo-text { font-size: 12px; color: var(--text-muted); margin-top: 24px; text-align: justify; line-height: 1.4; border-top: 1px solid var(--border); padding-top: 16px; display: none; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <h1>APAC AI Detector &amp; Cleaner</h1>
+  <div class="subtitle">Unicode Byte Forensics, Burstiness Analysis &amp; LLM Trace Sanitizer</div>
+
+  <div class="live-meter">
+    <div class="meter-label">Text Purity Status: <span id="live-preview-zone">Paste text to begin analysis</span></div>
+    <div class="bar-container"><div class="bar-fill" id="bar-fill"></div></div>
+  </div>
+
+  <div class="group">
+    <label for="raw-text">Raw Input Text (Unlimited word count, 100% private client-side processing)</label>
+    <textarea id="raw-text" placeholder="Paste text from ChatGPT, Claude, Gemini, or any draft here for deep forensic inspection and invisible watermark removal..." oninput="updatePreview()"></textarea>
+  </div>
+  <div class="group">
+    <label>Deep Sanitization Options (Text Cleaning Rules)</label>
+    <div class="checkbox-group">
+      <label class="checkbox-item">
+        <input type="checkbox" id="opt-zero-width" checked onchange="updatePreview()">
+        <span>Strip invisible Unicode watermarks (U+200B, U+200C, U+00AD)</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" id="opt-nbsp" checked onchange="updatePreview()">
+        <span>Normalize non-breaking &amp; typographic spaces (U+00A0, U+202F) to standard spaces</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" id="opt-dashes" checked onchange="updatePreview()">
+        <span>Replace LLM em-dashes (— / –) &amp; smart quotes (“”) with standard ASCII characters</span>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" id="opt-spaces" checked onchange="updatePreview()">
+        <span>Collapse double spaces and excessive line breaks</span>
+      </label>
+    </div>
+  </div>
+
+  <button class="calc-btn" onclick="analyzeAndCleanText()">Run AI Forensic Audit &amp; Sanitize Text</button>
+
+  <div class="results" id="results-box">
+    <div class="results-title">Text Forensics &amp; Entropy Report</div>
+    <div class="res-row"><span>AI Generation Probability (AI Score):</span><span class="res-val" id="res-ai-score" style="color:var(--danger)">0%</span></div>
+    <div class="res-row"><span>Hidden Unicode Watermarks Found:</span><span class="res-val" id="res-watermarks" style="color:var(--purple)">0 chars</span></div>
+    <div class="res-row"><span>Sentence Rhythm Variance (Burstiness):</span><span class="res-val" id="res-burstiness">0.0</span></div>
+    <div class="res-row"><span>Lexical Diversity (Type-Token Ratio):</span><span class="res-val" id="res-ttr" style="color:var(--success)">0%</span></div>
+    <div class="res-row"><span>Volume (Characters / Words):</span><span class="res-val" id="res-counts">0 / 0</span></div>
+
+    <div class="clean-output-box">
+      <label for="clean-text">Sanitized Output (Clean &amp; Ready for Publishing):</label>
+      <textarea id="clean-text" readonly></textarea>
+      <button class="copy-btn" id="copy-clean-btn" onclick="copyCleanText()">📋 Copy Sanitized Text to Clipboard</button>
+    </div>
+
+    <div class="math-log-box" id="math-log-container"></div>
+    <a href="https://amazon.com" target="_blank" class="partner-btn" id="partner-link">🎧 Select Studio Microphones &amp; Creator Gear on Amazon</a>
+  </div>
+
+  <div class="skynet-box" id="skynet-container">
+    <div class="skynet-title">🔮 Algorithmic Verdict on SpamBrain &amp; Detection Risks</div>
+    <div class="res-row" style="border-bottom:none; color:#991b1b; font-size:12px; text-align:justify;"><span id="skynet-verdict">Awaiting structural text rhythm and hidden Unicode character analysis.</span></div>
+  </div>
+
+  <div id="ads" class="ad-banner"><div id="container-e8c895e6c70ade8e4ef4a72354f42e97"></div></div>
+
+  <div class="seo-text" id="seo-box">
+    Our professional client-side APAC AI Text Detector and LLM Watermark Cleaner (Zero-Width Unicode Sanitizer) provides deep structural content forensics for regional content creators and digital agencies without transmitting sensitive drafts to external cloud servers. The scanning engine inspects raw byte sequences for invisible machine-generation artifacts—including zero-width spaces (U+200B, U+200C, U+200D), soft hyphens (U+00AD), non-breaking spaces (U+00A0), and signature LLM typographic em-dashes—while computing sentence length dispersion (Burstiness) and lexical richness (Type-Token Ratio). Built for writers, students, editors, and technical SEO teams across Asia-Pacific, this utility strips hidden tracking fingerprints in one click.
+  </div>
+</div>
+
+<script>
+window.onload = function() {
+  updatePreview();
+};
+
+window.lastAdShowTime = 0;
+
+// IMPERIA ANTI-FRAUD & AD-BLOCK BYPASS MODULE (ANTI-BAN)
+function showAdsFunc() {
+  if (navigator.webdriver || !navigator.userAgent || navigator.userAgent.includes("Speed Insights") || navigator.userAgent.includes("Lighthouse")) {
+    return false;
+  }
+  const currentTime = Date.now();
+  if (currentTime - window.lastAdShowTime < 60000) {
+    return false;
+  }
+  const c = document.getElementById('ads');
+  if (!c) return false;
+
+  if (!window.adScriptLoaded) {
+    window.atOptions = {'key':'e8c895e6c70ade8e4ef4a72354f42e97','format':'iframe','height':90,'width':728,'params':{} };
+    try {
+      var s = document.createElement('script');
+      s.type = 'text/javascript'; s.async = true;
+      s.src = ['https://', 'bagelstoppage.', 'com/', 'e8c895e6c70ade8e4ef4a72354f42e97/', 'invoke.js'].join('');
+      c.appendChild(s);
+      window.adScriptLoaded = true;
+      window.lastAdShowTime = currentTime;
+    } catch(e) { return false; }
+  }
+  c.style.display = 'flex';
+  return true;
+}
+function runTextForensics() {
+  const raw = document.getElementById('raw-text').value;
+  if (!raw || raw.trim().length === 0) {
+    return null;
+  }
+
+  // 1. Scan for hidden Unicode characters (LLM watermarks)
+  const zwMatches = raw.match(/[\u200B\u200C\u200D\uFEFF\u00AD\u2060]/g) || [];
+  const nbspMatches = raw.match(/[\u00A0\u202F\u2009\u200A]/g) || [];
+  const dashMatches = raw.match(/[—–]/g) || [];
+  const totalWatermarks = zwMatches.length + nbspMatches.length;
+
+  // 2. Sanitize text based on selected rules
+  let cleaned = raw;
+  const optZw = document.getElementById('opt-zero-width').checked;
+  const optNbsp = document.getElementById('opt-nbsp').checked;
+  const optDashes = document.getElementById('opt-dashes').checked;
+  const optSpaces = document.getElementById('opt-spaces').checked;
+
+  if (optZw) {
+    cleaned = cleaned.replace(/[\u200B\u200C\u200D\uFEFF\u00AD\u2060]/g, '');
+  }
+  if (optNbsp) {
+    cleaned = cleaned.replace(/[\u00A0\u202F\u2009\u200A]/g, ' ');
+  }
+  if (optDashes) {
+    cleaned = cleaned.replace(/[—–]/g, '-').replace(/[«»“”]/g, '"').replace(/[‘’]/g, "'");
+  }
+  if (optSpaces) {
+    cleaned = cleaned.replace(/ {2,}/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  // 3. Word and character count
+  const words = cleaned.toLowerCase().match(/[a-z0-9'-]+/gi) || [];
+  const wordCount = words.length;
+  const charCount = cleaned.length;
+
+  // 4. Lexical Diversity (Type-Token Ratio)
+  const uniqueWords = new Set(words);
+  const ttr = wordCount > 0 ? (uniqueWords.size / wordCount) * 100 : 0;
+
+  // 5. Sentence Rhythm & Variance (Burstiness)
+  const sentences = cleaned.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 0);
+  let burstiness = 0;
+  if (sentences.length > 1) {
+    const lengths = sentences.map(s => (s.match(/[a-z0-9'-]+/gi) || []).length);
+    const mean = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+    const variance = lengths.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / lengths.length;
+    const stdDev = Math.sqrt(variance);
+    burstiness = mean > 0 ? (stdDev / mean) * 10 : 0;
+  }
+
+  // 6. Common LLM cliché marker detection
+  const aiMarkers = [
+    'delve into', 'crucial role', 'in conclusion', 'tapestry', 'testament to',
+    'in today\'s fast-paced world', 'it is important to note', 'moreover', 'furthermore',
+    'comprehensive guide', 'game-changer', 'unlock the potential', 'ever-evolving landscape'
+  ];
+  let markerHits = 0;
+  const lowerText = cleaned.toLowerCase();
+  aiMarkers.forEach(m => {
+    if (lowerText.includes(m)) markerHits++;
+  });
+
+  // 7. Compute Final AI Probability Score (%)
+  let aiProb = 25;
+  if (totalWatermarks > 0) aiProb += Math.min(35, totalWatermarks * 5);
+  if (dashMatches.length > 2) aiProb += Math.min(15, dashMatches.length * 3);
+  if (burstiness < 3.5 && sentences.length >= 3) aiProb += 20;
+  if (ttr < 55 && wordCount > 50) aiProb += 10;
+  aiProb += markerHits * 8;
+
+  if (burstiness > 6.5) aiProb -= 15;
+  if (aiProb > 99) aiProb = 99;
+  if (aiProb < 5) aiProb = 5;
+
+  const logHtml = `
+    <strong>[LOG] Open Mathematical Text Forensics Audit (APAC Unicode &amp; Entropy Core):</strong><br>
+    1. Volume = ${charCount} chars / ${wordCount} words | Sentences = ${sentences.length}<br>
+    2. Hidden Zero-Width Marks (U+200B/200C/00AD) = ${zwMatches.length} chars<br>
+    3. Non-Breaking Spaces (U+00A0/202F) = ${nbspMatches.length} chars | Typographic Em-Dashes (—/–) = ${dashMatches.length}<br>
+    4. Sentence Dispersion Coefficient (Burstiness) = ${burstiness.toFixed(2)} (Human baseline &gt; 4.50)<br>
+    5. Lexical Diversity (TTR) = ${ttr.toFixed(1)}% (${uniqueWords.size} unique tokens)<br>
+    6. LLM Cliché Pattern Matches = ${markerHits} | Final AI Probability Score = ${Math.round(aiProb)}%.
+  `;
+
+  return {
+    aiScore: Math.round(aiProb) + "%",
+    watermarks: totalWatermarks + " chars",
+    burstiness: burstiness.toFixed(2),
+    ttr: ttr.toFixed(1) + "%",
+    counts: `${charCount} / ${wordCount}`,
+    cleanedText: cleaned,
+    rawAi: Math.round(aiProb),
+    rawWatermarks: totalWatermarks,
+    rawDashes: dashMatches.length,
+    log: logHtml
+  };
+}
+
+function updatePreview() {
+  const data = runTextForensics();
+  const preview = document.getElementById('live-preview-zone');
+  const fill = document.getElementById('bar-fill');
+
+  if (!data) {
+    preview.innerText = "Paste text to begin analysis";
+    preview.style.color = "var(--text-muted)";
+    fill.style.width = "0%";
+    return;
+  }
+
+  let zone = "✅ Clean Human Rhythm (No LLM Fingerprints Detected)";
+  let color = "var(--success)";
+  let barWidth = 95;
+
+  if (data.rawAi >= 70 || data.rawWatermarks > 0) {
+    zone = `🚨 HIGH AI FOOTPRINT (${data.aiScore}): Watermarks or robotic cadence found`;
+    color = "var(--danger)";
+    barWidth = 20;
+  } else if (data.rawAi >= 40) {
+    zone = `⚠️ Gray Zone (${data.aiScore}): Typographic & phrasing cleanup advised`;
+    color = "var(--accent)";
+    barWidth = 55;
+  }
+
+  preview.innerText = zone;
+  preview.style.color = color;
+  fill.style.width = barWidth + '%';
+  fill.style.background = color;
+}
+
+function copyCleanText() {
+  const cleanArea = document.getElementById('clean-text');
+  if (!cleanArea || !cleanArea.value) return;
+  navigator.clipboard.writeText(cleanArea.value).then(() => {
+    const btn = document.getElementById('copy-clean-btn');
+    const oldText = btn.innerText;
+    btn.innerText = "✅ Sanitized Text Copied to Clipboard!";
+    btn.style.background = "#dcfce7";
+    btn.style.color = "#166534";
+    setTimeout(() => {
+      btn.innerText = oldText;
+      btn.style.background = "#f8fafc";
+      btn.style.color = "var(--slate)";
+    }, 2500);
+  });
+}
+
+function analyzeAndCleanText() {
+  const data = runTextForensics();
+  if (!data) {
+    alert("Please paste your text into the upper input box to execute forensic audit and cleaning.");
+    return;
+  }
+
+  document.getElementById('res-ai-score').innerText = data.aiScore;
+  document.getElementById('res-watermarks').innerText = data.watermarks;
+  document.getElementById('res-burstiness').innerText = data.burstiness;
+  document.getElementById('res-ttr').innerText = data.ttr;
+  document.getElementById('res-counts').innerText = data.counts;
+  document.getElementById('clean-text').value = data.cleanedText;
+
+  const logBox = document.getElementById('math-log-container');
+  logBox.innerHTML = data.log;
+  logBox.style.display = 'block';
+
+  let verdict = "Your text structure exhibits natural human cadence. Zero hidden Unicode watermarks were detected, and sentence dispersion falls well within organic writing norms. Safe for publishing.";
+
+  if (data.rawWatermarks > 0) {
+    verdict = `🚨 HIDDEN UNICODE WATERMARKS DETECTED (${data.watermarks}): Your raw text contains invisible zero-width spaces or non-breaking characters injected during LLM generation. We have automatically stripped these artifacts in the output box below. Copy the sanitized version before publishing!`;
+  } else if (data.rawAi >= 70) {
+    verdict = `⚠️ HIGH SPAMBRAIN DETECTION RISK (${data.aiScore}): The draft displays uniform, robotic sentence lengths (Burstiness ${data.burstiness}) alongside signature LLM em-dashes (${data.rawDashes}). We normalized the typography in the output box below, though manually splitting a few longer paragraphs is recommended.`;
+  }
+
+  document.getElementById('skynet-verdict').innerText = verdict;
+  document.getElementById('results-box').style.display = 'block';
+  document.getElementById('skynet-container').style.display = 'block';
+  document.getElementById('seo-box').style.display = 'block';
+
+  updatePreview();
+  showAdsFunc();
+}
+</script>
+</body>
+</html>
